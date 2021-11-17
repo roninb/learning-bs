@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import pytextnow
+import time
+from datetime import datetime
 
 cookies = {
     'ASP.NET_SessionId': 'x04ablumklzvxepkb45pzu2z',
@@ -40,7 +42,7 @@ data = {
     'ctl00$ContentPlaceHolder1$btnLogin': 'Login'
 }
 
-mobile = pytextnow.Client("username", sid_cookie="check dev tools", csrf_cookie="keep network tab open while logging in")
+mobile = pytextnow.Client("username", sid_cookie="check dev tools", csrf_cookie="leave network tab open while logging in")
 
 response = requests.post('http://helpdesk.gal.fl.gov/logon.aspx', headers=headers, params=params, cookies=cookies, data=data, verify=False)
 
@@ -48,10 +50,13 @@ soup = BeautifulSoup(response.content, "html.parser")
 
 assignments = soup.find(id="ContentPlaceHolder1_ddlTech")
 tix_date = soup.find(id="ContentPlaceHolder1_tbxCreationDate").get('value')
-
-if tix_date:
+current_time = datetime.now()
+if tix_date and current_time.weekday() < 5 and 17 > current_time.hour > 8:
     assignment = assignments.find('option', selected=True).text
     print(f"Ticket #{ticket_number} is unassigned") if assignment == "Not Assigned" else print(f"Ticket #{ticket_number} is assigned to {assignment}")
-    mobile.send_sms("your number", f"Ticket #{ticket_number} is unassigned" if assignment == "Not Assigned" else f"Ticket #{ticket_number} is assigned to {assignment}")
+    mobile.send_sms("urmomscell", f"Ticket #{ticket_number} is unassigned" if assignment == "Not Assigned" else f"Ticket #{ticket_number} is assigned to {assignment}")
+    ticket_number = ticket_number + 1
+    print(ticket_number)
 else:
     print(f"Ticket #{ticket_number} has no \"Creation Date\"")
+    time.sleep(900)
