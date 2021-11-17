@@ -22,7 +22,7 @@ headers = {
     'sec-gpc': '1',
 }
 
-ticket_number = 6544
+ticket_number = 7520
 
 params = (
     ('ReturnUrl', f'/PagesForAdmin/AdminTicketDetail.aspx?id={ticket_number}'),
@@ -47,7 +47,10 @@ response = requests.post('http://helpdesk.gal.fl.gov/logon.aspx', headers=header
 soup = BeautifulSoup(response.content, "html.parser")
 
 assignments = soup.find(id="ContentPlaceHolder1_ddlTech")
-assignment = assignments.find('option', selected=True).text
-print(assignment)
+tix_date = soup.find(id="ContentPlaceHolder1_tbxCreationDate").get('value')
 
-print(f"Ticket #{ticket_number} is unassigned") if assignment == "Not Assigned" else print(f"Ticket #{ticket_number} is assigned to {assignment}")
+if tix_date:
+    assignment = assignments.find('option', selected=True).text
+    print(f"Ticket #{ticket_number} is unassigned") if assignment == "Not Assigned" else print(f"Ticket #{ticket_number} is assigned to {assignment}")
+else:
+    print(f"Ticket #{ticket_number} has no \"Creation Date\"")
