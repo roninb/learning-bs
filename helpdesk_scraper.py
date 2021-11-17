@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-
-import requests
+import pytextnow
 
 cookies = {
     'ASP.NET_SessionId': 'x04ablumklzvxepkb45pzu2z',
@@ -22,7 +21,7 @@ headers = {
     'sec-gpc': '1',
 }
 
-ticket_number = 7520
+ticket_number = 7519
 
 params = (
     ('ReturnUrl', f'/PagesForAdmin/AdminTicketDetail.aspx?id={ticket_number}'),
@@ -41,6 +40,7 @@ data = {
     'ctl00$ContentPlaceHolder1$btnLogin': 'Login'
 }
 
+mobile = pytextnow.Client("username", sid_cookie="check dev tools", csrf_cookie="keep network tab open while logging in")
 
 response = requests.post('http://helpdesk.gal.fl.gov/logon.aspx', headers=headers, params=params, cookies=cookies, data=data, verify=False)
 
@@ -52,5 +52,6 @@ tix_date = soup.find(id="ContentPlaceHolder1_tbxCreationDate").get('value')
 if tix_date:
     assignment = assignments.find('option', selected=True).text
     print(f"Ticket #{ticket_number} is unassigned") if assignment == "Not Assigned" else print(f"Ticket #{ticket_number} is assigned to {assignment}")
+    mobile.send_sms("your number", f"Ticket #{ticket_number} is unassigned" if assignment == "Not Assigned" else f"Ticket #{ticket_number} is assigned to {assignment}")
 else:
     print(f"Ticket #{ticket_number} has no \"Creation Date\"")
