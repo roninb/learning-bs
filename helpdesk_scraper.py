@@ -22,9 +22,11 @@ headers = {
     'sec-gpc': '1',
 }
 
+ticket_number = 6544
+
 params = (
-    ('ReturnUrl', '/PagesForAdmin/AdminTicketDetail.aspx?id=7519'),
-    ('id', '7519'),
+    ('ReturnUrl', f'/PagesForAdmin/AdminTicketDetail.aspx?id={ticket_number}'),
+    ('id', f'{ticket_number}'),
 )
 
 data = {
@@ -43,4 +45,9 @@ data = {
 response = requests.post('http://helpdesk.gal.fl.gov/logon.aspx', headers=headers, params=params, cookies=cookies, data=data, verify=False)
 
 soup = BeautifulSoup(response.content, "html.parser")
-print(soup)
+
+assignments = soup.find(id="ContentPlaceHolder1_ddlTech")
+assignment = assignments.find('option', selected=True).text
+print(assignment)
+
+print(f"Ticket #{ticket_number} is unassigned") if assignment == "Not Assigned" else print(f"Ticket #{ticket_number} is assigned to {assignment}")
